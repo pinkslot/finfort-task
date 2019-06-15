@@ -1,0 +1,93 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}FinFort test{% endblock %}
+
+{% block body %}
+<button type="button" id="changelogButton" class="btn btn-primary" data-toggle="modal" data-target="#changelogModal">
+    Upload updates
+</button>
+
+{{ dump(changelog) }}
+
+    <!-- Modal -->
+<div class="modal fade" id="changelogModal" tabindex="-1" role="dialog" aria-labelledby="changelogModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="changelogModalLabel">Changelog</h5>
+            </div>
+            <div class="modal-body">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th scope="col">Id</th>
+                        <th scope="col">Date</th>
+                        <th scope="col">Title</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+{% endblock %}
+
+{% block javascripts %}
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"
+            integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+            crossorigin="anonymous">
+    </script>
+    <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"
+            integrity="sha256-eGE6blurk5sHj+rmkfsGYeKyZx3M4bG+ZlFyA7Kns7E="
+            crossorigin="anonymous">
+    </script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" crossorigin="anonymous"></script>
+    <script src="//stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" crossorigin="anonymous"></script>
+
+    <script type="text/javascript">
+    (function($) {
+        var loadChangelog = function(url, $tbody) {
+            $.getJSON(url, function(data) {
+                var rows = [];
+                $.each(data["items"], function(key, item) {
+                    var $row = $("<tr>"),
+                        date = $.datepicker.formatDate("dd.mm.yy", new Date(item["date"]))
+                    ;
+
+                    $("<td>").text(item["id"]).appendTo($row);
+                    $("<td>").text(date).appendTo($row);
+                    $("<td>").text(item["title"]).appendTo($row);
+
+                    rows.push($row[0].outerHTML);
+                });
+
+                $tbody.html(rows.join(""));
+            });
+        };
+
+        $.fn.changelogLoader = function(url) {
+            var $tbody = $("#changelogModal tbody");
+
+            return this.each(function() {
+                $(this).click(function () {
+                    loadChangelog(url, $tbody);
+                });
+            });
+        };
+
+        $(function () {
+            $("#changelogButton").changelogLoader("{{ path('changelog') }}");
+        });
+    }(jQuery));
+    </script>
+{% endblock %}
